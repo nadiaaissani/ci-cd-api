@@ -1,17 +1,20 @@
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
+
 export default [
   {
+    files: ["src/**/*.ts"],
     languageOptions: {
       ecmaVersion: 2020,
-      sourceType: "commonjs",
+      sourceType: "module",
+      parser: tsparser,
       globals: {
-        require: "readonly",
-        module: "readonly",
-        exports: "readonly",
-        __dirname: "readonly",
-        __filename: "readonly",
-        process: "readonly",
-        console: "readonly"
+        console: "readonly",
+        process: "readonly"
       }
+    },
+    plugins: {
+      "@typescript-eslint": tseslint
     },
     rules: {}
   }

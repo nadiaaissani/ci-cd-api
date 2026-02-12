@@ -1,7 +1,11 @@
+
+import dotenv from 'dotenv';
+dotenv.config();
+// Test CI pipeline
 import express, { Request, Response } from 'express';
 
 const app = express();
-const PORT: number = 3000;
+const PORT: number = parseInt(process.env.PORT || '3000', 10);
 
 // Route Health
 app.get('/health', (req: Request, res: Response) => {
