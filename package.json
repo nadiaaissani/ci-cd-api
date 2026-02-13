@@ -1,7 +1,7 @@
 {
   "name": "ci-cd-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "lint": "eslint src/ --ext .ts",
     "ts": "tsc --noEmit",
