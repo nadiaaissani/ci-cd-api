@@ -1,7 +1,6 @@
 {
   "name": "ci-cd-api",
   "version": "1.0.0",
-  "main": "dist/server.js",
   "scripts": {
     "lint": "eslint src/ --ext .ts",
     "ts": "tsc --noEmit",
@@ -12,13 +11,13 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') { require('child_process').execSync('husky', {stdio: 'inherit'}) }\""
   },
+  "engines": {
+    "node": "20.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "engines": {
-    "node": "20.x"
-  },
   "dependencies": {
     "dotenv": "^17.2.4",
     "express": "^5.2.1"
