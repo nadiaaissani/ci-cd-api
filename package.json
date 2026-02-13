@@ -6,8 +6,11 @@
     "lint": "eslint src/ --ext .ts",
     "ts": "tsc --noEmit",
     "build": "tsc",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
     "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts"
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +26,9 @@
     "@typescript-eslint/eslint-plugin": "^8.55.0",
     "@typescript-eslint/parser": "^8.55.0",
     "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
