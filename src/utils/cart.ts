@@ -13,6 +13,13 @@ export function calculerPrixAvecReduction(
 export function calculerPrixTotal(
   panier: { prix: number; quantite: number }[]
 ): number {
+  if (panier == null)
+    throw new Error('Le panier ne peut pas être null ou undefined');
+  for (const item of panier) {
+    if (item.prix < 0) throw new Error('Le prix ne peut pas être négatif');
+    if (item.quantite < 0)
+      throw new Error('La quantité ne peut pas être négative');
+  }
   return panier.reduce((total, item) => total + item.prix * item.quantite, 0);
 }
 
