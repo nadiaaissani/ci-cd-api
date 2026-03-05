@@ -10,9 +10,11 @@ import {
 // TESTS — calculerPrixAvecReduction
 // ─────────────────────────────────────────
 describe('calculerPrixAvecReduction', () => {
+  // happy test
   test('calcule correctement une réduction de 10%', () => {
     expect(calculerPrixAvecReduction(100, 10)).toBe(90);
   });
+  //  EDGE CASE
 
   test('retourne le prix original si réduction = 0', () => {
     expect(calculerPrixAvecReduction(100, 0)).toBe(100);
@@ -32,16 +34,43 @@ describe('calculerPrixAvecReduction', () => {
 // TESTS — calculerPrixTotal
 // ─────────────────────────────────────────
 describe('calculerPrixTotal', () => {
-  test('calcule le prix total du panier', () => {
-    const panier = [
-      { prix: 100, quantite: 2 },
-      { prix: 50, quantite: 1 },
-    ];
-    expect(calculerPrixTotal(panier)).toBe(250);
+  // happy cases
+  it('devrait calculer le prix total pour plusieurs produits', () => {
+    expect(
+      calculerPrixTotal([
+        { prix: 100, quantite: 2 },
+        { prix: 50, quantite: 1 },
+      ])
+    ).toBe(250);
   });
 
-  test('retourne 0 si le panier est vide', () => {
+  it('devrait calculer le prix total pour un seul produit', () => {
+    expect(calculerPrixTotal([{ prix: 100, quantite: 3 }])).toBe(300);
+  });
+
+  it('devrait retourner 0 si le panier est vide', () => {
     expect(calculerPrixTotal([])).toBe(0);
+  });
+
+  it('devrait retourner 0 si la quantité est 0', () => {
+    expect(calculerPrixTotal([{ prix: 100, quantite: 0 }])).toBe(0);
+  });
+
+  // edge cases
+  it('devrait lancer une erreur si le panier est null', () => {
+    expect(() => calculerPrixTotal(null as any)).toThrow();
+  });
+
+  it('devrait lancer une erreur si le panier est undefined', () => {
+    expect(() => calculerPrixTotal(undefined as any)).toThrow();
+  });
+
+  it('devrait lancer une erreur si le prix est négatif', () => {
+    expect(() => calculerPrixTotal([{ prix: -50, quantite: 2 }])).toThrow();
+  });
+
+  it('devrait lancer une erreur si la quantité est négative', () => {
+    expect(() => calculerPrixTotal([{ prix: 100, quantite: -3 }])).toThrow();
   });
 });
 
