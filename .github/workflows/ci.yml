@@ -44,7 +44,7 @@ jobs:
           tags: |
             aissaninadia/ci-cd-api:latest
             aissaninadia/ci-cd-api:${{ github.sha }}
-            aissaninadia/ci-cd-api:v1.0.0
+            aissaninadia/ci-cd-api:v1.1.0
 
       - name: Deploy to Render
         run: |
