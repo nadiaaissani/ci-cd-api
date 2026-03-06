@@ -29,6 +29,27 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # Install k6
+      - name: Install k6
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.49.0/k6-v0.49.0-linux-amd64.tar.gz -L | tar xvz
+          sudo cp k6-v0.49.0-linux-amd64/k6 /usr/local/bin
+
+      # Lancer le serveur en arrière plan
+      - name: Start server
+        run: npm start &
+        env:
+          PORT: 3000
+          NODE_ENV: production
+
+      # Attendre que le serveur soit prêt
+      - name: Wait for server
+        run: sleep 5
+
+      # Lancer le test de charge
+      - name: Run k6 load test
+        run: k6 run load-test.js
+
       # Connecter GitHub Actions à Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -40,6 +61,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          dockerfile: .Dockerfile
           push: true
           tags: |
             aissaninadia/ci-cd-api:latest
