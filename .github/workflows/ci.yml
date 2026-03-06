@@ -29,6 +29,7 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # Connecter GitHub Actions à Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -43,6 +44,7 @@ jobs:
           tags: |
             aissaninadia/ci-cd-api:latest
             aissaninadia/ci-cd-api:${{ github.sha }}
+            aissaninadia/ci-cd-api:v1.0.0
 
       - name: Deploy to Render
         run: |

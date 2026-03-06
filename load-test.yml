@@ -1,0 +1,15 @@
+config:
+  # URL de base de ton serveur local
+  target: "http://localhost:3000"
+  
+  phases:
+    - duration: 10        # Durée du test : 10 secondes
+      arrivalRate: 10     # 10 nouveaux utilisateurs arrivent chaque seconde
+      name: "Test de charge 10 secondes"
+
+scenarios:
+  # Ce que chaque utilisateur simulé va faire
+  - name: "Test route products"
+    flow:
+      - get:
+          url: "/products"   # La route qu'on teste
