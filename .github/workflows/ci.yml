@@ -5,7 +5,11 @@ on:
     branches: [main, staging]
 
 jobs:
-  build:
+  # ─────────────────────────────────────────
+  # JOB 1 : Tests (lint + TypeScript + jest)
+  # Pas besoin de base de données ici
+  # ─────────────────────────────────────────
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://localhost:5432/dummy
+
       - name: Check TypeScript
         run: npm run ts
 
@@ -29,23 +38,130 @@ jobs:
       - name: Run tests
         run: npm test
 
-      # Connecter GitHub Actions à Docker Hub
+  # ─────────────────────────────────────────
+  # JOB 2 : Test de charge k6
+  # Lance PostgreSQL + Redis + API puis k6
+  # ─────────────────────────────────────────
+  load-test:
+    runs-on: ubuntu-latest
+    needs: test  # attend que les tests passent avant de lancer k6
+
+    services:
+      # Lance PostgreSQL pendant le job
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ci_cd_api
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # Lance Redis pendant le job
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Génère le client Prisma (nécessaire avant le build)
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      # Build TypeScript → génère le dossier dist/
+      - name: Build
+        run: npm run build
+
+      # Applique les migrations Prisma sur la base de données
+      - name: Run migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ci_cd_api?schema=public
+
+      # Seed la base de données avec les produits
+      - name: Seed database
+        run: npx prisma db seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ci_cd_api?schema=public
+
+      # Démarre le serveur en arrière-plan
+      - name: Start server
+        run: npm start &
+        env:
+          PORT: 3000
+          NODE_ENV: production
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ci_cd_api?schema=public
+          REDIS_URL: redis://localhost:6379
+
+      # Attend que le serveur soit prêt
+      - name: Wait for server
+        run: sleep 5
+
+      # Installe k6
+      - name: Install k6
+        run: |
+          curl https://github.com/grafana/k6/releases/download/v0.49.0/k6-v0.49.0-linux-amd64.tar.gz -L | tar xvz
+          sudo cp k6-v0.49.0-linux-amd64/k6 /usr/local/bin
+
+      # Lance le test de charge
+      - name: Run k6 load test
+        run: k6 run load-test.js
+
+  # ─────────────────────────────────────────
+  # JOB 3 : Build Docker + Push + Déploiement
+  # Lance seulement si les 2 jobs précédents passent
+  # ET seulement sur une PR vers main (pas staging)
+  # ─────────────────────────────────────────
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test, load-test]  # attend que test ET load-test passent
+    if: github.base_ref == 'main'  # uniquement pour les PR vers main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Connexion à Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Build et push de l'image Docker
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Dockerfile
           push: true
           tags: |
             aissaninadia/ci-cd-api:latest
             aissaninadia/ci-cd-api:${{ github.sha }}
             aissaninadia/ci-cd-api:v1.1.0
 
+      # Déploiement sur Render
       - name: Deploy to Render
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
