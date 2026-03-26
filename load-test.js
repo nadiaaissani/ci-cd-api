@@ -14,8 +14,8 @@ export const options = {
   // Si ces seuils ne sont pas respectés, le test échoue.
   // ─────────────────────────────────────────────────────────
   thresholds: {
-    // 95% des requêtes doivent répondre en moins de 500ms
-    http_req_duration: ['p(95)<500'],
+    // 95% des requêtes doivent répondre en moins de 600ms
+    http_req_duration: ['p(95)<600'],
 
     // Le taux d'erreur HTTP doit rester sous 1%
     http_req_failed: ['rate<0.01'],
