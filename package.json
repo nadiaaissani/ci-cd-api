@@ -4,7 +4,7 @@
   "scripts": {
     "lint": "eslint src/ --ext .ts",
     "ts": "tsc --noEmit",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "format": "prettier --write src/**/*.ts",
     "format:check": "prettier --check src/**/*.ts",
     "start": "node dist/server.js",
