@@ -11,18 +11,26 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7-alpine
+    container_name: ci-cd-redis
+    ports:
+      - '6379:6379'
+
   api:
     build:
       context: .
-      dockerfile: .Dockerfile
+      dockerfile: Dockerfile
     container_name: ci-cd-api
     ports:
       - '3000:3000'
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/ci_cd_api?schema=public
+      REDIS_URL: redis://redis:6379
       NODE_ENV: production
     depends_on:
       - db
+      - redis
 
 volumes:
   postgres_data:
