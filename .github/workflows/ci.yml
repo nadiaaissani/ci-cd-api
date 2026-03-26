@@ -122,10 +122,12 @@ jobs:
   # ─────────────────────────────────────────
   # JOB 3 : Build Docker + Push + Déploiement
   # Lance seulement si les 2 jobs précédents passent
+  # ET seulement sur une PR vers main (pas staging)
   # ─────────────────────────────────────────
   deploy:
     runs-on: ubuntu-latest
     needs: [test, load-test]  # attend que test ET load-test passent
+    if: github.base_ref == 'main'  # uniquement pour les PR vers main
 
     steps:
       - name: Checkout code
