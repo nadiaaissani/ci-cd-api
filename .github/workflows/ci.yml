@@ -154,7 +154,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: Dockerfile
+          file: Dockerfile
           push: true
           tags: |
             aissaninadia/ci-cd-api:latest
